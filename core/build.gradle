@@ -29,7 +29,6 @@ dependencies {
 	api "com.strongjoshua:libgdx-inGameConsole:$inGameConsoleVersion"
 	api "com.sudoplay.joise:joise:$joiseVersion"
 	api "de.golfgl.gdxcontrollerutils:gdx-controllerutils-scene2d:$controllerScene2DVersion"
-	api "de.tomgrill.gdxdialogs:gdx-dialogs-core:$dialogsVersion"
 	api "io.github.libktx:ktx-actors:$ktxVersion"
 	api "io.github.libktx:ktx-app:$ktxVersion"
 	api "io.github.libktx:ktx-ashley:$ktxVersion"

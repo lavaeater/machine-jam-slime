@@ -61,9 +61,6 @@ dependencies {
 	implementation "com.rafaskoberg.gdx:typing-label:$typingLabelVersion:sources"
 	implementation "com.sudoplay.joise:joise:$joiseVersion:sources"
 	implementation "de.golfgl.gdxcontrollerutils:gdx-controllerutils-scene2d:$controllerScene2DVersion:sources"
-	implementation "de.tomgrill.gdxfacebook:gdx-dialogs-core:$dialogsVersion:sources"
-	implementation "de.tomgrill.gdxfacebook:gdx-dialogs-html:$dialogsVersion"
-	implementation "de.tomgrill.gdxfacebook:gdx-dialogs-html:$dialogsVersion:sources"
 	implementation "space.earlygrey:shapedrawer:$shapeDrawerVersion:sources"
 	implementation "space.earlygrey:simple-graphs:$simpleGraphsVersion:sources"
 	implementation project(':core')
