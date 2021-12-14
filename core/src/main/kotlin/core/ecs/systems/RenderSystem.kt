@@ -44,6 +44,6 @@ class RenderSystem(
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
         val sprite = spriteComponent.get(entity)
-        shapeDrawer.filledCircle(sprite.sprite.x, sprite.sprite.y, 5f, Color.RED)
+        //shapeDrawer.filledCircle(sprite.sprite.x, sprite.sprite.y, 5f, Color.RED)
     }
 }
