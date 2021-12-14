@@ -65,29 +65,22 @@ fun ball(at: Vector2) {
     }
 }
 
-fun blobEntity() {
-    val position = vec2()
-    val l = 1f
-    val a = vec2(position.x + l,0f)
-    val b = vec2(l / 2, (sqrt(3*l)/2))
-    val c = vec2()
-    val d = vec2()
-    val e = vec2()
-    val f = vec2()
+fun blobEntity(at: Vector2, length: Float) {
+    val l = length
+    val a = vec2(l,0f)
+    val b = vec2(l / 2f, sqrt(3f)*l/2f)
+    val c = vec2(-l/2, sqrt(3f) * l/2f)
+    val d = vec2(-l,0f)
+    val e = vec2(-l/2, sqrt(3f) * -l/2f)
+    val f = vec2(l/2, sqrt(3f) * -l/2f)
+    val vertices = listOf(a,b,c,d,e,f)
 
-    val constantVolumeJointDef = JointDef().apply {
-        type = JointDef.JointType.DistanceJoint
-
-    }
-    for(i in 0 until 6) {
-
+    for(vertex in vertices) {
         val body = world.body {
             type = BodyDef.BodyType.DynamicBody
-            circle(2f, vec2(0f, 0f)) {
-                isSensor = true
-            }
+            position.set(at.x + vertex.x, at.y + vertex.y)
+            circle(2f, vec2(0f, 0f)) {}
         }
-
     }
 }
 
@@ -103,6 +96,7 @@ class FirstScreen(
 
     override fun show() {
         ball(vec2(5f,5f))
+        blobEntity(vec2(0f, 0f), 10f)
         platform(vec2(-10f,-20f), 40f, 2.5f)
     }
 
