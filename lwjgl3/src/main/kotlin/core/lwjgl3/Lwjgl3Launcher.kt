@@ -10,7 +10,7 @@ import core.MachineJamSlime
 fun main() {
     Lwjgl3Application(MachineJamSlime(), Lwjgl3ApplicationConfiguration().apply {
         setTitle("machine-jam-slime")
-        setWindowedMode(640, 480)
+        setWindowedMode(1280, 960)
         setWindowIcon(*(arrayOf(128, 64, 32, 16).map { "libgdx$it.png" }.toTypedArray()))
     })
 }

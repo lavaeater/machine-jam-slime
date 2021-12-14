@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import core.FirstScreen
+import core.ecs.systems.CameraFollowSystem
 import core.ecs.systems.PhysicsEntityUpdateSystem
 import core.ecs.systems.PhysicsUpdateSystem
 import core.ecs.systems.RenderSystem
@@ -16,14 +17,8 @@ import injection.GameConstants.GAMEWIDTH
 import ktx.box2d.createWorld
 import ktx.inject.Context
 import ktx.inject.register
+import ktx.math.vec2
 import space.earlygrey.shapedrawer.ShapeDrawer
-
-object GameConstants {
-    const val pixelsPerMeter = 16f
-    const val scale = 1 / pixelsPerMeter
-    const val GAMEWIDTH = 128f
-    const val GAMEHEIGHT = 102f
-}
 
 object Context {
     val context = Context()
@@ -60,15 +55,16 @@ object Context {
                     inject<OrthographicCamera>() as Camera
                 )
             )
-            bindSingleton(createWorld())
+            bindSingleton(createWorld(vec2(0f, -10f)))
             bindSingleton(getEngine())
-            bindSingleton(FirstScreen(inject()))
+            bindSingleton(FirstScreen(inject(), inject(), inject()))
         }
     }
 
     private fun getEngine(): Engine {
         return PooledEngine().apply {
             addSystem(PhysicsUpdateSystem(inject()))
+            addSystem(CameraFollowSystem(inject()))
             addSystem(PhysicsEntityUpdateSystem())
             addSystem(RenderSystem(inject(), inject(), inject(), inject()))
         }
