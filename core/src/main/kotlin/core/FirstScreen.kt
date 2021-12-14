@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.JointDef
 import com.badlogic.gdx.physics.box2d.World
@@ -18,9 +19,7 @@ import ktx.ashley.entity
 import ktx.ashley.with
 import ktx.assets.disposeSafely
 import ktx.assets.toInternalFile
-import ktx.box2d.body
-import ktx.box2d.box
-import ktx.box2d.circle
+import ktx.box2d.*
 import ktx.math.vec2
 import kotlin.math.sqrt
 
@@ -75,12 +74,42 @@ fun blobEntity(at: Vector2, length: Float) {
     val f = vec2(l/2, sqrt(3f) * -l/2f)
     val vertices = listOf(a,b,c,d,e,f)
 
-    for(vertex in vertices) {
-        val body = world.body {
+    val centerBody = world.body {
+        type = BodyDef.BodyType.DynamicBody
+        position.set(at)
+        circle(2f, vec2(0f, 0f)) {}
+    }
+    lateinit var previousBody: Body
+    lateinit var firstBody: Body
+    for((index, vertex) in vertices.withIndex()) {
+        val currentBody = world.body {
             type = BodyDef.BodyType.DynamicBody
             position.set(at.x + vertex.x, at.y + vertex.y)
             circle(2f, vec2(0f, 0f)) {}
         }
+        centerBody.distanceJointWith(currentBody) {
+            this.length = l
+            this.frequencyHz = 1f
+            this.dampingRatio = 0.1f
+        }
+        if(index == 0) {
+            firstBody = currentBody
+        }
+        if(index > 0) {
+            previousBody.distanceJointWith(currentBody) {
+                this.length = l
+                this.frequencyHz = 1f
+                this.dampingRatio = 0.1f
+            }
+        }
+        if(index == vertices.lastIndex) {
+            firstBody.distanceJointWith(currentBody) {
+                this.length = l
+                this.frequencyHz = 1f
+                this.dampingRatio = 0.1f
+            }
+        }
+        previousBody = currentBody
     }
 }
 
