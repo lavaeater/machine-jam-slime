@@ -3,6 +3,7 @@ package core.ecs.systems
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.graphics.OrthographicCamera
+import core.ecs.AshleyMappers
 import core.ecs.components.BodyComponent
 import core.ecs.components.CameraFollowComponent
 import ktx.ashley.allOf

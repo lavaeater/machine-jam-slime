@@ -2,14 +2,13 @@ package core.ecs.systems
 
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.physics.box2d.World
 import core.ecs.components.SpriteComponent
-import core.ecs.systems.AshleyMappers.spriteComponent
+import core.ecs.AshleyMappers.spriteComponent
 import ktx.app.clearScreen
 import ktx.ashley.allOf
 import ktx.graphics.use
