@@ -2,6 +2,7 @@ package core.ecs.systems
 
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
 import com.badlogic.gdx.math.Rectangle
@@ -37,12 +38,12 @@ class RenderSystem(
         /*
         I just want a square
          */
-        shapeDrawer.rectangle(map)
+        //shapeDrawer.rectangle(map)
         //shapeDrawer.filledCircle(5f * pixelsPerMeter,5f * pixelsPerMeter,2.5f, Color.RED)
     }
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
         val sprite = spriteComponent.get(entity)
-        //shapeDrawer.filledCircle(sprite.sprite.x, sprite.sprite.y, 5f, Color.RED)
+        shapeDrawer.filledCircle(sprite.sprite.x, sprite.sprite.y, 1f, Color.RED)
     }
 }

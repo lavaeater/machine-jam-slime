@@ -1,6 +1,7 @@
 package core
 
 import com.badlogic.ashley.core.Engine
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
@@ -8,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import core.Factories.ball
+import core.Factories.createSlime
 import core.Factories.platform
 import injection.Context.inject
 import ktx.app.KtxInputAdapter
@@ -42,10 +44,11 @@ class FirstScreen(
     private val batch = SpriteBatch()
 
     override fun show() {
+        Gdx.input.inputProcessor = this
         ball(vec2(5f,5f))
         //blobEntity(vec2(0f, 0f), 10f)
-        buildSlimeCircle(vec2(0f, 0f))
-        platform(vec2(-20f,-50f), 100f, 2.5f)
+        createSlime(vec2(0f, 0f))
+        platform(vec2(-20f,-100f), 200f, 2.5f)
     }
 
     override fun render(delta: Float) {
@@ -80,7 +83,7 @@ class FirstScreen(
                 true
             }
             Input.Keys.A -> {
-                x = -1f
+                x = 1f
                 true
             }
             Input.Keys.S -> {
@@ -88,7 +91,7 @@ class FirstScreen(
                 true
             }
             Input.Keys.D -> {
-                x = 1f
+                x = -1f
                 true
             }
             else -> super.keyDown(keycode)

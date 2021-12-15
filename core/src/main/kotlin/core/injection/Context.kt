@@ -8,10 +8,7 @@ import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import core.FirstScreen
-import core.ecs.systems.CameraFollowSystem
-import core.ecs.systems.PhysicsEntityUpdateSystem
-import core.ecs.systems.PhysicsUpdateSystem
-import core.ecs.systems.RenderSystem
+import core.ecs.systems.*
 import injection.GameConstants.GAMEHEIGHT
 import injection.GameConstants.GAMEWIDTH
 import ktx.box2d.createWorld
@@ -66,6 +63,7 @@ object Context {
             addSystem(PhysicsUpdateSystem(inject()))
             addSystem(CameraFollowSystem(inject()))
             addSystem(PhysicsEntityUpdateSystem())
+            addSystem(SlimeSystem())
             addSystem(RenderSystem(inject(), inject(), inject(), inject()))
         }
     }

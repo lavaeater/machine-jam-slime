@@ -1,10 +1,12 @@
 package core
 
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import core.ecs.components.BodyComponent
 import core.ecs.components.CameraFollowComponent
+import core.ecs.components.SlimerComponent
 import core.ecs.components.SpriteComponent
 import ktx.ashley.entity
 import ktx.ashley.with
@@ -26,25 +28,25 @@ object Factories {
             with<BodyComponent> {
                 this.body = body
             }
-            with<CameraFollowComponent>()
             with<SpriteComponent>()
         }
     }
 
-    fun ball(at: Vector2) {
+    fun ball(at: Vector2) : Body {
         val body = world.body {
             type = BodyDef.BodyType.DynamicBody
             position.set(at)
             circle(1f) {
+                density = .1f
             }
         }
         engine.entity {
             with<BodyComponent> {
                 this.body = body
             }
-            with<CameraFollowComponent>()
             with<SpriteComponent>()
         }
+        return body
     }
 
     fun blobEntity(at: Vector2, length: Float) {
@@ -94,5 +96,85 @@ object Factories {
             }
             previousBody = currentBody
         }
+    }
+
+    fun createSlime(at: Vector2) {
+        /**
+         * Let's assume a cirlce with 12 sections, to keep it
+         * reasonable.
+         * x = cx + r * cos(a)
+         * y = cy + r * sin(a)
+         */
+        val slimer = SlimerComponent()
+        val numberOfPoints = 10
+        val radius = 15f
+        val angleShift = MathUtils.PI2 / numberOfPoints
+        var currentAngle = 0f
+        val theta = MathUtils.PI - angleShift / 2 - MathUtils.PI / 2
+        val baseLength = 2 * radius * MathUtils.cos(theta)
+        /**
+         * 2b ⋅ cosθ
+         */
+
+
+        val centerBody = world.body {
+            type = BodyDef.BodyType.DynamicBody
+            position.set(at)
+            fixedRotation = false
+            circle(1f, at) {
+                density = .1f
+            }
+        }
+        slimer.centerBody = centerBody
+        lateinit var previousBody: Body
+        lateinit var currentBody: Body
+        lateinit var firstBody: Body
+        for (index in 0 until numberOfPoints) {
+            //1. Calculate point location using simple trigonometry
+            val x = at.x + radius * MathUtils.cos(currentAngle)
+            val y = at.y + radius * MathUtils.sin(currentAngle)
+            val vertex = vec2(x, y)
+
+            currentBody = world.body {
+                type = BodyDef.BodyType.DynamicBody
+                position.set(at.x + vertex.x, at.y + vertex.y)
+                fixedRotation = false
+                circle(1f, vec2(0f, 0f)) {
+                    density = .1f
+                }
+            }
+            slimer.outershell.add(currentBody)
+            centerBody.distanceJointWith(currentBody) {
+                this.length = radius
+                this.frequencyHz = 0.5f
+                this.dampingRatio = 0.1f
+            }
+            if(index == 0) {
+                firstBody = currentBody
+            }
+            if(index > 0) {
+                previousBody.distanceJointWith(currentBody) {
+                    this.length = baseLength
+                    this.frequencyHz = 1f
+                    this.dampingRatio = 0.1f
+                }
+            }
+            if(index == numberOfPoints - 1) {
+                firstBody.distanceJointWith(currentBody) {
+                    this.length = baseLength
+                    this.frequencyHz = 1f
+                    this.dampingRatio = 0.1f
+                }
+            }
+            previousBody = currentBody
+            currentAngle += angleShift
+        }
+
+        val entity = engine.createEntity()
+        entity.add(slimer)
+        entity.add(SpriteComponent())
+        entity.add(CameraFollowComponent())
+        entity.add(BodyComponent().apply { body = centerBody })
+        engine.addEntity(entity)
     }
 }
