@@ -8,11 +8,13 @@ import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.physics.box2d.World
+import core.ControlObject
 import core.ecs.components.SpriteComponent
 import core.ecs.AshleyMappers.spriteComponent
 import ktx.app.clearScreen
 import ktx.ashley.allOf
 import ktx.graphics.use
+import ktx.math.vec2
 import space.earlygrey.shapedrawer.ShapeDrawer
 
 class RenderSystem(
@@ -29,6 +31,12 @@ class RenderSystem(
         clearScreen(red = 85f / 255f, green = 132f / 255f, blue = 172f / 255f)
         batch.use {
             renderMap(deltaTime)
+            shapeDrawer.line(camera.position.x, camera.position.y, ControlObject.mousePosition.x, ControlObject.mousePosition.y)
+            val endVec = ControlObject.aimVector.cpy().scl(15f)
+            shapeDrawer.line(camera.position.x, camera.position.y, camera.position.x + endVec.x, camera.position.y + endVec.y, Color.RED)
+            val rayCastEnd = vec2(camera.position.x, camera.position.y).add(ControlObject.aimVector.cpy().scl(200f))
+            shapeDrawer.line(camera.position.x, camera.position.y, rayCastEnd.x, rayCastEnd.y, Color.ORANGE)
+
             super.update(deltaTime)
         }
         box2DDebugRenderer.render(world, camera.combined)
@@ -44,6 +52,6 @@ class RenderSystem(
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
         val sprite = spriteComponent.get(entity)
-        shapeDrawer.filledCircle(sprite.sprite.x, sprite.sprite.y, 1f, Color.RED)
+        shapeDrawer.filledCircle(sprite.sprite.x, sprite.sprite.y, .1f, sprite.color)
     }
 }

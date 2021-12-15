@@ -52,7 +52,7 @@ object Context {
                     inject<OrthographicCamera>() as Camera
                 )
             )
-            bindSingleton(createWorld(vec2(0f, -10f)))
+            bindSingleton(createWorld(vec2(0f, 0f)))
             bindSingleton(getEngine())
             bindSingleton(FirstScreen(inject(), inject(), inject()))
         }
