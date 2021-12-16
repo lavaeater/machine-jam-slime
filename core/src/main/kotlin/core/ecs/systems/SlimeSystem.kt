@@ -40,13 +40,7 @@ class SlimeSystem : IteratingSystem(allOf(SlimerComponent::class).get()) {
 
         slimer.outershell.sortBy { it.position.dst(endVec) }
         val closest = slimer.outershell.take(2)
-        for (close in closest) {
-            val entity = close.userData as Entity
-            val spriteComponent = spriteComponent.get(entity)
-            spriteComponent.color = Color.GREEN
-        }
-
-        if (ControlObject.leftTrigger && ControlObject.leftTriggerEnabled) {
+            if (ControlObject.leftTrigger && ControlObject.leftTriggerEnabled) {
             ControlObject.leftTriggerEnabled = false
             /**
              * 1. Create a new body / entity and then add sections of joints out from it...
@@ -129,11 +123,11 @@ class SlimeSystem : IteratingSystem(allOf(SlimerComponent::class).get()) {
             }
         }
 
-        for (body in slimer.outershell.filterNot { closest.contains(it) }) {
-            val entity = body.userData as Entity
-            val spriteComponent = spriteComponent.get(entity)
-            spriteComponent.color = Color.RED
-        }
+//        for (body in slimer.outershell.filterNot { closest.contains(it) }) {
+//            val entity = body.userData as Entity
+//            val spriteComponent = spriteComponent.get(entity)
+//            spriteComponent.color = Color.RED
+//        }
         if (ControlObject.directionVector != Vector2.Zero) {
             /**
              * Take the directionvector and apply it as a force on the normal

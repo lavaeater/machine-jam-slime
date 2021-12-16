@@ -36,7 +36,23 @@ object Factories {
             with<BodyComponent> {
                 this.body = body
             }
-            with<SpriteComponent>()
+        }
+    }
+
+    fun obstacle(at: Vector2) {
+        val body = world.body {
+            type = BodyDef.BodyType.StaticBody
+            position.set(at)
+            box(2f, 2f) {}
+            userData = "PLATFORM"
+        }
+        engine.entity {
+            with<BodyComponent> {
+                this.body = body
+            }
+            with<SpriteComponent> {
+                sprite = Assets.obstacleSprite()
+            }
         }
     }
 
@@ -52,7 +68,6 @@ object Factories {
             with<BodyComponent> {
                 this.body = body
             }
-            with<SpriteComponent>()
         }
         return body
     }
@@ -168,10 +183,8 @@ object Factories {
 
         var entity = engine.createEntity()
         entity.add(slimer)
-        entity.add(SpriteComponent().apply {
-            color = Color.GREEN
-        })
         entity.add(CameraFollowComponent())
+        entity.add(SpriteComponent().apply { sprite = Assets.dummySprite })
         entity.add(BodyComponent().apply { body = centerBody })
         engine.addEntity(entity)
         centerBody.userData = entity
@@ -183,9 +196,6 @@ object Factories {
 
     fun createSlimeEntity(body: Body) : Entity {
         val entity = engine.entity {
-            with<SpriteComponent> {
-                color = Color.RED
-            }
             with<BodyComponent> {
                 this.body = body
             }

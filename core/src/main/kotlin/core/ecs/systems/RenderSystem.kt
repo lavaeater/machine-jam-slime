@@ -96,7 +96,8 @@ class RenderSystem(
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
         val sprite = spriteComponent.get(entity)
-        shapeDrawer.filledCircle(sprite.sprite.x, sprite.sprite.y, .1f, sprite.color)
+        sprite.sprite.draw(batch)
+        //shapeDrawer.filledCircle(sprite.sprite.x, sprite.sprite.y, .1f, sprite.color)
         if(slimerComponent.has(entity)) {
             renderSlimer(slimerComponent.get(entity))
         }

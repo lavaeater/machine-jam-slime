@@ -1,7 +1,7 @@
 package injection
 
 object GameConstants {
-    const val pixelsPerMeter = 20f
+    const val pixelsPerMeter = 16f
     const val scale = 1 / pixelsPerMeter
     const val GAMEWIDTH = 72f
     const val GAMEHEIGHT = 72f

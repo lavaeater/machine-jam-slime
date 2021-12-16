@@ -5,8 +5,10 @@ import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.graphics.*
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
+import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.viewport.ExtendViewport
+import core.Assets.shapeTexture
 import core.FirstScreen
 import core.ecs.systems.*
 import injection.GameConstants.GAMEHEIGHT
@@ -28,14 +30,11 @@ object Context {
         return context.inject()
     }
 
-    private fun createShapeDrawer() : ShapeDrawer {
-        val pixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
-        pixmap.setColor(Color.WHITE)
-        pixmap.drawPixel(0, 0)
-        val texture = Texture(pixmap) //remember to dispose of later
-        pixmap.dispose()
 
-        val shapeDrawerRegion = TextureRegion(texture, 0, 0, 1, 1)
+
+    private fun createShapeDrawer() : ShapeDrawer {
+
+        val shapeDrawerRegion = TextureRegion(shapeTexture, 0, 0, 1, 1)
 
         return ShapeDrawer(inject<PolygonSpriteBatch>() as Batch, shapeDrawerRegion)
     }

@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import core.Factories.createSlime
+import core.Factories.obstacle
 import core.Factories.platform
 import injection.Context.inject
 import ktx.app.KtxInputAdapter
@@ -55,10 +56,10 @@ class FirstScreen(
         //blobEntity(vec2(0f, 0f), 10f)
         createSlime(vec2(0f, 0f), 5f, 20, .5f)
         platform(vec2(-20f,-40f), 200f, 1.25f)
-        platform(vec2(20f, -30f), 5f, 5f)
-        platform(vec2(-20f, 60f), 5f, 5f)
-        platform(vec2(20f, 60f), 5f, 5f)
-        platform(vec2(30f, 20f), 5f, 5f)
+        obstacle(vec2(20f, -30f))
+        obstacle(vec2(-20f, 60f))
+        obstacle(vec2(20f, 60f))
+        obstacle(vec2(30f, 20f))
     }
 
     override fun render(delta: Float) {
