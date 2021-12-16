@@ -29,11 +29,14 @@ import ktx.math.component1
 import ktx.math.vec2
 
 class SlimeSystem : IteratingSystem(allOf(SlimerComponent::class).get()) {
-
-    val testBody by lazy {
-        ball(vec2(0f, 0f))
+    init {
+        ControlObject.rightTriggerOffCallbacks.add(::destroyCurrentRope)
     }
 
+    var destroyCurrentRope = false
+    private fun destroyCurrentRope() {
+        destroyCurrentRope = true
+    }
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
         val slimer = slimerComponent.get(entity)
@@ -129,17 +132,20 @@ class SlimeSystem : IteratingSystem(allOf(SlimerComponent::class).get()) {
             }
         }
 
-//        for (body in slimer.outershell.filterNot { closest.contains(it) }) {
-//            val entity = body.userData as Entity
-//            val spriteComponent = spriteComponent.get(entity)
-//            spriteComponent.color = Color.RED
-//        }
         if(slimer.ropeySlimey.any()) {
             when (ControlObject.horizontalDirection) {
                 Direction.Left -> slimer.ropeySlimey.nextItem()
                 Direction.Right -> slimer.ropeySlimey.previousItem()
-                else -> {}
+                else -> {
+                    val pair = slimer.ropeySlimey.sortedBy {
+                        val angleToCentre = slimer.centerBody.position.cpy().sub(it.anchorBodies.first.position).angleRad()
+                        angleToCentre - ControlObject.aimVector.angleRad()
+                    }.first()
+                    slimer.ropeySlimey.selectedIndex = slimer.ropeySlimey.indexOf(pair)
+                }
             }
+            //Select the one closest to the mousevector
+
         }
         if (ControlObject.directionVector != Vector2.Zero) {
             /**
@@ -154,6 +160,20 @@ class SlimeSystem : IteratingSystem(allOf(SlimerComponent::class).get()) {
             for (body in slimer.outershell) {
                 body.applyTorque(ControlObject.directionVector.x * 100f * deltaTime, true)
             }
+        }
+        if(destroyCurrentRope) {
+            if(slimer.ropeySlimey.any()) {
+                val rope = slimer.ropeySlimey.selectedItem
+                slimer.ropeySlimey.remove(rope)
+                for(joint in  rope.joints) {
+                    world.destroyJoint(joint)
+                }
+                for(node in rope.nodes) {
+                    world.destroyBody(node.key)
+                    engine.removeEntity(node.value)
+                }
+            }
+            destroyCurrentRope = false
         }
     }
 }

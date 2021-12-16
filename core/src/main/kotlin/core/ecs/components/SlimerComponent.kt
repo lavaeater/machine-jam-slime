@@ -15,7 +15,7 @@ fun<T> selectedItemListOf(vararg items: T): SelectedItemList<T> {
 
 class SelectedItemList<T> : ArrayList<T>() {
     var selectedIndex: Int = 0
-        private set(value) {
+        set(value) {
             field = when {
                 value < 0 -> this.lastIndex
                 value > this.lastIndex -> 0
@@ -31,6 +31,11 @@ class SelectedItemList<T> : ArrayList<T>() {
         selectedIndex--
         return selectedItem
     }
+
+    override fun remove(element: T): Boolean {
+        selectedIndex = 0
+        return super.remove(element)
+    }
 }
 
 class SlimerComponent: Component, Pool.Poolable {
@@ -40,6 +45,7 @@ class SlimerComponent: Component, Pool.Poolable {
     val allJoints = mutableListOf<Joint>()
     val ropeySlimey = selectedItemListOf<SlimeRope>()
     val allSections = mutableListOf<Triple<Body, Body, Body>>()
+
     override fun reset() {
         if(::centerBody.isInitialized) {
             world.destroyBody(centerBody)
