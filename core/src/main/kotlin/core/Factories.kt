@@ -161,6 +161,7 @@ object Factories {
             }
             if(index > 0) {
                 slimer.allSections.add(Triple(centerBody, previousBody, currentBody))
+                slimer.outerPairs.add(Pair(previousBody, currentBody))
                 slimer.allJoints.add(previousBody.distanceJointWith(currentBody) {
                     this.length = baseLength
                     this.frequencyHz = outerShellHz
@@ -170,6 +171,7 @@ object Factories {
             }
             if(index == numberOfPoints - 1) {
                 slimer.allSections.add(Triple(centerBody, firstBody, currentBody))
+                slimer.outerPairs.add(Pair(currentBody, firstBody))
                 slimer.allJoints.add(firstBody.distanceJointWith(currentBody) {
                     this.length = baseLength
                     this.frequencyHz = outerShellHz

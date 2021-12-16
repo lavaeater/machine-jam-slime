@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.Fixture
 import core.ControlObject
+import core.Direction
 import core.Factories.ball
 import core.Factories.createSlimeEntity
 import core.Factories.createSlimeNode
@@ -38,9 +39,14 @@ class SlimeSystem : IteratingSystem(allOf(SlimerComponent::class).get()) {
         val slimer = slimerComponent.get(entity)
         val endVec = slimer.centerBody.position.cpy().add(ControlObject.aimVector.cpy().scl(15f))
 
-        slimer.outershell.sortBy { it.position.dst(endVec) }
-        val closest = slimer.outershell.take(2)
-            if (ControlObject.leftTrigger && ControlObject.leftTriggerEnabled) {
+        val anchorPair = slimer.outerPairs.sortedWith(object: Comparator<Pair<Body, Body>> {
+            override fun compare(o1: Pair<Body, Body>, o2: Pair<Body, Body>): Int {
+                val dist1 = (o1.first.position.dst(endVec) + o1.second.position.dst(endVec)) / 2
+                val dist2 = (o2.first.position.dst(endVec) + o2.second.position.dst(endVec)) / 2
+                return dist1.compareTo(dist2)
+            }
+        }).first()
+        if (ControlObject.leftTrigger && ControlObject.leftTriggerEnabled) {
             ControlObject.leftTriggerEnabled = false
             /**
              * 1. Create a new body / entity and then add sections of joints out from it...
@@ -79,22 +85,22 @@ class SlimeSystem : IteratingSystem(allOf(SlimerComponent::class).get()) {
             val firstBody = createSlimeNode(endVec, .5f)
             val entity = createSlimeEntity(firstBody)
             rope.nodes[firstBody] = entity
-            for (b in closest) {
+            for (b in anchorPair.toList()) {
                 rope.joints.add(b.distanceJointWith(firstBody) {
                     this.length = b.position.dst(firstBody.position)
                     this.frequencyHz = GameConstants.outerShellHz
                     this.dampingRatio = GameConstants.outerShellDamp
                 })
             }
-            rope.triangle = Triple(firstBody, closest[0], closest[1])
+            rope.triangle = Triple(firstBody, anchorPair.first, anchorPair.second)
+            rope.anchorBodies = anchorPair
 
-            if(lastFraction < 1f) {
+            if (lastFraction < 1f) {
                 val endPosition = lastHitPoint.cpy()
                 val distance = firstBody.position.dst(endPosition)
                 val numberOfSegments = (distance / segmentLength).toInt()
 
                 val segmentVector = endPosition.cpy().sub(firstBody.position).nor().scl(segmentLength)
-
 
                 lateinit var currentBody: Body
                 var previousBody = firstBody
@@ -128,6 +134,13 @@ class SlimeSystem : IteratingSystem(allOf(SlimerComponent::class).get()) {
 //            val spriteComponent = spriteComponent.get(entity)
 //            spriteComponent.color = Color.RED
 //        }
+        if(slimer.ropeySlimey.any()) {
+            when (ControlObject.horizontalDirection) {
+                Direction.Left -> slimer.ropeySlimey.nextItem()
+                Direction.Right -> slimer.ropeySlimey.previousItem()
+                else -> {}
+            }
+        }
         if (ControlObject.directionVector != Vector2.Zero) {
             /**
              * Take the directionvector and apply it as a force on the normal

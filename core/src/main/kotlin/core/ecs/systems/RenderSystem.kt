@@ -92,6 +92,10 @@ class RenderSystem(
 
             batch.draw(Assets.slimeTexture, actualVertices, 0, actualVertices.size)
         }
+        if(slimer.ropeySlimey.any()) {
+            val selectedPair = slimer.ropeySlimey.selectedItem.triangle
+            shapeDrawer.filledCircle(selectedPair.first.position, 1f, Color.BLUE)
+        }
     }
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
