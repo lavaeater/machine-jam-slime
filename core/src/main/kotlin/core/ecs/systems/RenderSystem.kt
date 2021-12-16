@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.physics.box2d.World
 import core.Assets
@@ -58,6 +59,31 @@ class RenderSystem(
     private fun renderSlimer(slimer: SlimerComponent) {
         for(section in slimer.allSections) {
             val vertices = mutableListOf<Array<Float>>()
+            vertices.add(arrayOf(section.first.position.x, section.first.position.y, Color.WHITE.toFloatBits(), 0f,1f))
+            vertices.add(arrayOf(section.second.position.x, section.second.position.y, Color.WHITE.toFloatBits(), 0f,0f))
+            vertices.add(arrayOf(section.third.position.x, section.third.position.y, Color.WHITE.toFloatBits(), 1f,0f))
+            vertices.add(arrayOf(section.first.position.x, section.first.position.y, Color.WHITE.toFloatBits(), 1f,1f))
+            val actualVertices = vertices.toTypedArray().flatten().toFloatArray()
+
+            batch.draw(Assets.slimeTexture, actualVertices, 0, actualVertices.size)
+        }
+        for(rope in slimer.ropeySlimey) {
+            lateinit var lastNode: Body
+            for((index, node) in rope.nodes.keys.withIndex()) {
+                if(index > 0) {
+                    val vertices = mutableListOf<Array<Float>>()
+                    vertices.add(arrayOf(node.position.x + 0.5f, node.position.y + 0.5f, Color.WHITE.toFloatBits(), 0f,1f))
+                    vertices.add(arrayOf(node.position.x - 0.5f, node.position.y - 0.5f, Color.WHITE.toFloatBits(), 0f,0f))
+                    vertices.add(arrayOf(lastNode.position.x - 0.5f, lastNode.position.y - 0.5f, Color.WHITE.toFloatBits(), 1f,0f))
+                    vertices.add(arrayOf(lastNode.position.x + 0.5f, lastNode.position.y + 0.5f, Color.WHITE.toFloatBits(), 1f,1f))
+                    val actualVertices = vertices.toTypedArray().flatten().toFloatArray()
+
+                    batch.draw(Assets.slimeTexture, actualVertices, 0, actualVertices.size)
+                }
+                lastNode = node
+            }
+            val vertices = mutableListOf<Array<Float>>()
+            val section = rope.triangle
             vertices.add(arrayOf(section.first.position.x, section.first.position.y, Color.WHITE.toFloatBits(), 0f,1f))
             vertices.add(arrayOf(section.second.position.x, section.second.position.y, Color.WHITE.toFloatBits(), 0f,0f))
             vertices.add(arrayOf(section.third.position.x, section.third.position.y, Color.WHITE.toFloatBits(), 1f,0f))

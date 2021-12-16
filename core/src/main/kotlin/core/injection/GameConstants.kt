@@ -7,7 +7,7 @@ object GameConstants {
     const val GAMEHEIGHT = 72f
     const val outerShellHz = 1f
     const val outerShellDamp = 0.1f
-    const val spokeHz = 0.5f
-    const val spokeDamp = 0.1f
-    const val segmentLength = 15f
+    const val spokeHz = 1f
+    const val spokeDamp = 0.3f
+    const val segmentLength = 5f
 }

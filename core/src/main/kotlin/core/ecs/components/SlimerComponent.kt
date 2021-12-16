@@ -22,4 +22,6 @@ class SlimerComponent: Component, Pool.Poolable {
     }
 }
 
-class SlimeRope(val nodes: MutableMap<Body, Entity>, val joints: MutableList<Joint>)
+class SlimeRope(val nodes: MutableMap<Body, Entity>, val joints: MutableList<Joint>) {
+    lateinit var triangle: Triple<Body, Body, Body>
+}

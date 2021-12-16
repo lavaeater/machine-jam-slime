@@ -30,6 +30,7 @@ object Factories {
             type = BodyDef.BodyType.StaticBody
             position.set(at)
             box(width, height) {}
+            userData = "PLATFORM"
         }
         engine.entity {
             with<BodyComponent> {

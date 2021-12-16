@@ -5,6 +5,7 @@ import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
+import com.badlogic.gdx.physics.box2d.Fixture
 import core.ControlObject
 import core.Factories.ball
 import core.Factories.createSlimeEntity
@@ -58,6 +59,9 @@ class SlimeSystem : IteratingSystem(allOf(SlimerComponent::class).get()) {
              * Then we ray cast from the new node to... mouseposition, of course
              */
             val rayCastEnd = slimer.centerBody.position.cpy().add(ControlObject.aimVector.cpy().scl(200f))
+            var lastFraction = 10f
+            lateinit var lastFixture: Fixture
+            val lastHitPoint = vec2()
             world.rayCast(
                 startX = endVec.x,
                 startY = endVec.y,
@@ -69,58 +73,60 @@ class SlimeSystem : IteratingSystem(allOf(SlimerComponent::class).get()) {
                  *
                  * Now, create a slimey rope of string between these.
                  */
-                if(fraction < 1f) {
-
-                    val rope = SlimeRope(mutableMapOf(), mutableListOf())
-                    slimer.ropeySlimey.add(rope)
-                    val firstBody = createSlimeNode(endVec, .5f)
-                    val entity = createSlimeEntity(firstBody)
-                    rope.nodes[firstBody] = entity
-                    for (b in closest) {
-                        rope.joints.add(b.distanceJointWith(firstBody) {
-                            this.length = b.position.dst(firstBody.position)
-                            this.frequencyHz = GameConstants.outerShellHz
-                            this.dampingRatio = GameConstants.outerShellDamp
-                        })
-                    }
-
-                    val endPosition = point.cpy()
-                    val distance = firstBody.position.dst(endPosition)
-                    val numberOfSegments = (distance / segmentLength).toInt() / 2
-
-                    val segmentVector = endPosition.cpy().sub(firstBody.position).nor().scl(segmentLength)
-
-
-                    lateinit var currentBody: Body
-                    var previousBody = firstBody
-                    for (segment in 0 until numberOfSegments) {
-                        val newPos = firstBody.position.cpy().add(segmentVector)
-                        currentBody = createSlimeNode(newPos, .5f)
-                        val currentEntity = createSlimeEntity(currentBody)
-                        rope.nodes[currentBody] = currentEntity
-                        rope.joints.add(currentBody.distanceJointWith(previousBody) {
-                            length = segmentLength
-                            frequencyHz = outerShellHz
-                            dampingRatio = outerShellDamp
-                            collideConnected = false
-                        })
-                        previousBody = currentBody
-                        if (segment == numberOfSegments - 1) {
-                            rope.joints.add(currentBody.distanceJointWith(fixture.body) {
-                                localAnchorB.set(fixture.body.getLocalPoint(endPosition))
-                                length = 1f
-                                frequencyHz = 50f
-                                dampingRatio = 1f
-                                collideConnected = false
-                            })
-                        }
-                    }
-                    return@rayCast RayCast.TERMINATE
+                if (fraction < lastFraction) {
+                    lastFraction = fraction
+                    lastFixture = fixture
+                    lastHitPoint.set(point)
                 }
-
                 RayCast.CONTINUE
             }
+            val rope = SlimeRope(mutableMapOf(), mutableListOf())
+            slimer.ropeySlimey.add(rope)
+            val firstBody = createSlimeNode(endVec, .5f)
+            val entity = createSlimeEntity(firstBody)
+            rope.nodes[firstBody] = entity
+            for (b in closest) {
+                rope.joints.add(b.distanceJointWith(firstBody) {
+                    this.length = b.position.dst(firstBody.position)
+                    this.frequencyHz = GameConstants.outerShellHz
+                    this.dampingRatio = GameConstants.outerShellDamp
+                })
+            }
+            rope.triangle = Triple(firstBody, closest[0], closest[1])
 
+            if(lastFraction < 1f) {
+                val endPosition = lastHitPoint.cpy()
+                val distance = firstBody.position.dst(endPosition)
+                val numberOfSegments = (distance / segmentLength).toInt()
+
+                val segmentVector = endPosition.cpy().sub(firstBody.position).nor().scl(segmentLength)
+
+
+                lateinit var currentBody: Body
+                var previousBody = firstBody
+                for (segment in 0 until numberOfSegments) {
+                    val newPos = firstBody.position.cpy().add(segmentVector)
+                    currentBody = createSlimeNode(newPos, .5f)
+                    val currentEntity = createSlimeEntity(currentBody)
+                    rope.nodes[currentBody] = currentEntity
+                    rope.joints.add(currentBody.distanceJointWith(previousBody) {
+                        length = segmentLength / 4
+                        frequencyHz = outerShellHz
+                        dampingRatio = outerShellDamp
+                        collideConnected = false
+                    })
+                    previousBody = currentBody
+                    if (segment == numberOfSegments - 1) {
+                        rope.joints.add(currentBody.distanceJointWith(lastFixture.body) {
+                            localAnchorB.set(lastFixture.body.getLocalPoint(endPosition))
+                            length = 0.1f
+                            frequencyHz = 50f
+                            dampingRatio = 1f
+                            collideConnected = false
+                        })
+                    }
+                }
+            }
         }
 
         for (body in slimer.outershell.filterNot { closest.contains(it) }) {
