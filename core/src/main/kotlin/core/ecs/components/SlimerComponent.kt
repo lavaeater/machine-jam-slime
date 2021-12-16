@@ -10,7 +10,9 @@ import core.world
 class SlimerComponent: Component, Pool.Poolable {
     lateinit var centerBody: Body
     val outershell = mutableListOf<Body>()
+    val allJoints = mutableListOf<Joint>()
     val ropeySlimey = mutableListOf<SlimeRope>()
+    val allSections = mutableListOf<Triple<Body, Body, Body>>()
     override fun reset() {
         if(::centerBody.isInitialized) {
             world.destroyBody(centerBody)

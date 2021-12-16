@@ -134,30 +134,32 @@ object Factories {
 
             currentBody = createSlimeNode(vec2(at.x + vertex.x, at.y + vertex.y), nodeRadius)
             slimer.outershell.add(currentBody)
-            centerBody.distanceJointWith(currentBody) {
+            slimer.allJoints.add(centerBody.distanceJointWith(currentBody) {
                 this.length = radius
                 this.frequencyHz = spokeHz
                 this.dampingRatio = spokeDamp
                 collideConnected = false
-            }
+            })
             if(index == 0) {
                 firstBody = currentBody
             }
             if(index > 0) {
-                previousBody.distanceJointWith(currentBody) {
+                slimer.allSections.add(Triple(centerBody, previousBody, currentBody))
+                slimer.allJoints.add(previousBody.distanceJointWith(currentBody) {
                     this.length = baseLength
                     this.frequencyHz = outerShellHz
                     this.dampingRatio = outerShellDamp
                     collideConnected = false
-                }
+                })
             }
             if(index == numberOfPoints - 1) {
-                firstBody.distanceJointWith(currentBody) {
+                slimer.allSections.add(Triple(centerBody, firstBody, currentBody))
+                slimer.allJoints.add(firstBody.distanceJointWith(currentBody) {
                     this.length = baseLength
                     this.frequencyHz = outerShellHz
                     this.dampingRatio = outerShellDamp
                     collideConnected = false
-                }
+                })
             }
             previousBody = currentBody
             currentAngle += angleShift

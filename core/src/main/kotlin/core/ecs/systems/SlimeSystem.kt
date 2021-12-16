@@ -52,26 +52,15 @@ class SlimeSystem : IteratingSystem(allOf(SlimerComponent::class).get()) {
              *
              * First body should be at endVec
              */
-            val rope = SlimeRope(mutableMapOf(), mutableListOf())
-            slimer.ropeySlimey.add(rope)
-            val firstBody = createSlimeNode(endVec, .5f)
-            val entity = createSlimeEntity(firstBody)
-            rope.nodes[firstBody] = entity
-            for (b in closest) {
-                rope.joints.add(b.distanceJointWith(firstBody) {
-                    this.length = b.position.dst(firstBody.position)
-                    this.frequencyHz = GameConstants.outerShellHz
-                    this.dampingRatio = GameConstants.outerShellDamp
-                })
-            }
+
 
             /**
              * Then we ray cast from the new node to... mouseposition, of course
              */
             val rayCastEnd = slimer.centerBody.position.cpy().add(ControlObject.aimVector.cpy().scl(200f))
             world.rayCast(
-                startX = firstBody.position.x,
-                startY = firstBody.position.y,
+                startX = endVec.x,
+                startY = endVec.y,
                 endX = rayCastEnd.x,
                 endY = rayCastEnd.y
             ) { fixture, point, normal, fraction ->
@@ -80,36 +69,53 @@ class SlimeSystem : IteratingSystem(allOf(SlimerComponent::class).get()) {
                  *
                  * Now, create a slimey rope of string between these.
                  */
-                val endPosition = point.cpy()
-                val distance = firstBody.position.dst(endPosition)
-                val numberOfSegments = (distance / segmentLength).toInt() / 2
+                if(fraction < 1f) {
 
-                val segmentVector = endPosition.cpy().sub(firstBody.position).nor().scl(segmentLength)
-
-
-                lateinit var currentBody: Body
-                var previousBody = firstBody
-                for (segment in 0 until numberOfSegments) {
-                    val newPos = firstBody.position.cpy().add(segmentVector)
-                    currentBody = createSlimeNode(newPos, .5f)
-                    val currentEntity = createSlimeEntity(currentBody)
-                    rope.nodes[currentBody] = currentEntity
-                    rope.joints.add(currentBody.distanceJointWith(previousBody) {
-                        length = segmentLength
-                        frequencyHz = outerShellHz
-                        dampingRatio = outerShellDamp
-                        collideConnected = false
-                    })
-                    previousBody = currentBody
-                    if (segment == numberOfSegments - 1) {
-                        rope.joints.add(currentBody.distanceJointWith(fixture.body) {
-                            localAnchorB.set(fixture.body.getLocalPoint(endPosition))
-                            length = 1f
-                            frequencyHz = 50f
-                            dampingRatio = 1f
-                            collideConnected = false
+                    val rope = SlimeRope(mutableMapOf(), mutableListOf())
+                    slimer.ropeySlimey.add(rope)
+                    val firstBody = createSlimeNode(endVec, .5f)
+                    val entity = createSlimeEntity(firstBody)
+                    rope.nodes[firstBody] = entity
+                    for (b in closest) {
+                        rope.joints.add(b.distanceJointWith(firstBody) {
+                            this.length = b.position.dst(firstBody.position)
+                            this.frequencyHz = GameConstants.outerShellHz
+                            this.dampingRatio = GameConstants.outerShellDamp
                         })
                     }
+
+                    val endPosition = point.cpy()
+                    val distance = firstBody.position.dst(endPosition)
+                    val numberOfSegments = (distance / segmentLength).toInt() / 2
+
+                    val segmentVector = endPosition.cpy().sub(firstBody.position).nor().scl(segmentLength)
+
+
+                    lateinit var currentBody: Body
+                    var previousBody = firstBody
+                    for (segment in 0 until numberOfSegments) {
+                        val newPos = firstBody.position.cpy().add(segmentVector)
+                        currentBody = createSlimeNode(newPos, .5f)
+                        val currentEntity = createSlimeEntity(currentBody)
+                        rope.nodes[currentBody] = currentEntity
+                        rope.joints.add(currentBody.distanceJointWith(previousBody) {
+                            length = segmentLength
+                            frequencyHz = outerShellHz
+                            dampingRatio = outerShellDamp
+                            collideConnected = false
+                        })
+                        previousBody = currentBody
+                        if (segment == numberOfSegments - 1) {
+                            rope.joints.add(currentBody.distanceJointWith(fixture.body) {
+                                localAnchorB.set(fixture.body.getLocalPoint(endPosition))
+                                length = 1f
+                                frequencyHz = 50f
+                                dampingRatio = 1f
+                                collideConnected = false
+                            })
+                        }
+                    }
+                    return@rayCast RayCast.TERMINATE
                 }
 
                 RayCast.CONTINUE
