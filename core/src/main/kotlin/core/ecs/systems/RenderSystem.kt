@@ -37,15 +37,15 @@ class RenderSystem(
         clearScreen(red = 85f / 255f, green = 132f / 255f, blue = 172f / 255f)
         batch.use {
             renderMap(deltaTime)
-            shapeDrawer.line(camera.position.x, camera.position.y, ControlObject.mousePosition.x, ControlObject.mousePosition.y)
-            val endVec = ControlObject.aimVector.cpy().scl(15f)
-            shapeDrawer.line(camera.position.x, camera.position.y, camera.position.x + endVec.x, camera.position.y + endVec.y, Color.RED)
+//            shapeDrawer.line(camera.position.x, camera.position.y, ControlObject.mousePosition.x, ControlObject.mousePosition.y)
+//            val endVec = ControlObject.aimVector.cpy().scl(15f)
+//            shapeDrawer.line(camera.position.x, camera.position.y, camera.position.x + endVec.x, camera.position.y + endVec.y, Color.RED)
             val rayCastEnd = vec2(camera.position.x, camera.position.y).add(ControlObject.aimVector.cpy().scl(200f))
             shapeDrawer.line(camera.position.x, camera.position.y, rayCastEnd.x, rayCastEnd.y, Color.ORANGE, .1f)
 
             super.update(deltaTime)
         }
-        box2DDebugRenderer.render(world, camera.combined)
+        //box2DDebugRenderer.render(world, camera.combined)
     }
 
     private fun renderMap(deltaTime: Float) {
