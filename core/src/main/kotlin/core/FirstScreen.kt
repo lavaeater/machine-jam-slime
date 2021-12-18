@@ -6,15 +6,13 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import core.Factories.createSlime
-import core.Factories.obstacle
-import core.Factories.platform
 import injection.Context.inject
+import kotlinx.coroutines.processNextEventInCurrentThread
 import ktx.app.KtxInputAdapter
 import ktx.app.KtxScreen
 import ktx.assets.disposeSafely
@@ -24,7 +22,6 @@ import ktx.box2d.edge
 import ktx.math.random
 import ktx.math.vec2
 import ktx.math.vec3
-import java.lang.Math.pow
 import kotlin.math.pow
 
 val world: World
@@ -88,6 +85,11 @@ object ControlObject {
     val aimVector = vec2()
 }
 
+class TunnelSection(val tLeft: Vector2 = vec2(), val tRight: Vector2 = vec2(), val bLeft: Vector2 = vec2(),
+                    val bRight: Vector2 = vec2()
+) {
+}
+
 
 class FirstScreen(
     private val engine: Engine,
@@ -122,61 +124,114 @@ class FirstScreen(
      */
     fun createLevel(level: Int) {
 
-        var lengthLeft = 10f.pow(level)
+        var lengthLeft = 100f.pow(level)
 
         /*
         1. While going straight, the chance of a turn grows larger with every
         meter travelled
          */
-        val vertices = mutableListOf(vec2()) // we start at 0,0
+        val width = 15f
+        val left = mutableListOf(vec2(-width, 0f))
+        val right = mutableListOf(vec2(width, 0f))
         var chanceOfTurn = 0f
         val randomRange = 0f..99f
         var currentDirection: MapDirection = MapDirection.Up
-        var lastVertex = vertices.first()
+        var l = left.first().cpy()
+        var r = right.first().cpy()
         while (lengthLeft > 0f) {
+            val previousDirection = currentDirection
             if (randomRange.random() < chanceOfTurn) {
                 chanceOfTurn = 5f
                 currentDirection = MapDirection.possibleTurns[currentDirection]!!.random()
             } else {
                 chanceOfTurn += 5f
             }
-            lastVertex = lastVertex.cpy().add(currentDirection.directionVector.scl(5f))
-            lengthLeft -= 5f
-            vertices.add(lastVertex)
+            when(currentDirection) {
+                MapDirection.Down -> {
+                    when(previousDirection) {
+                        MapDirection.Down -> {
+                            l.set(l.x, l.y - width)
+                            r.set(r.x, r.y - width)
+                        }
+                        MapDirection.Left -> {
+                            val t = l.cpy()
+                            l = r.cpy()
+                            r = t
+                            l.set(l.x - 2 * width, l.y)
+                            r.set(r.x, r.y - width)
+                            left.add(l)
+                            right.add(r)
+                            l = l.cpy()
+                            r = r.cpy()
+                            l.set(l.x, l.y - 4 * width)
+                            r.set(r.x, r.y - width)
+                        }
+                        MapDirection.Right -> TODO()
+                    }
+                }
+                MapDirection.Left -> {
+                    when(previousDirection) {
+                        MapDirection.Down -> {
+                            l.set(l.x - width, l.y)
+                            r.set(r.x, r.y - 2 * width)
+                            left.add(l)
+                            right.add(r)
+                            l = l.cpy()
+                            r = r.cpy()
+                            l.set(l.x - width, l.y)
+                            r.set(r.x - width * 4, r.y)
+                        }
+                        MapDirection.Left -> {
+                            l.set(l.x - width, l.y)
+                            r.set(r.x - width, r.y)
+                        }
+                        MapDirection.Up -> {
+                            l.set(l.x - width, l.y)
+                            r.set(r.x, r.y + 2 * width)
+                            left.add(l)
+                            right.add(r)
+                            l = l.cpy()
+                            r = r.cpy()
+                            l.set(l.x - width, l.y)
+                            r.set(r.x - 4 * width, r.y)
+                        }
+                        else -> {}
+                    }
+                }
+                MapDirection.Right -> TODO()
+                MapDirection.Up -> TODO()
+            }
+            left.add(l)
+            right.add(r)
+
+            lengthLeft -= 1f
         }
+        for((index, direction) in directions.withIndex()) {
+            if(index > 0) {
+                val previousDirection = directions[index - 1]
+
+            }
+        }
+
 
         /*
         2. Create two edges, left and right, by simply
         moving the left edge 2.5f up and left, basically vec2(-2.5f, 2.5f)
          */
+        vertices.removeFirst()
         for ((index, vertex) in vertices.withIndex()) {
-            if (index == 0) {
+            if (index > 0) {
+                val previous = vertices[index - 1]
                 world.body {
                     type = BodyDef.BodyType.StaticBody
-                    val nextVertex = vertices[index + 1]
                     edge(
-                        vec2(-2.5f, 0f),
-                        vec2(nextVertex.x - 2.5f, nextVertex.y + 2.5f)
+                        vec2(previous.first.x, previous.first.y),
+                        vec2(vertex.first.x, vertex.first.y)
                     ) {
                     }
                     edge(
-                        vec2(2.5f, 0f),
-                        vec2(nextVertex.x + 2.5f, nextVertex.y - 2.5f)
-                    ) {
-                    }
-                }
-            } else if (index < vertices.lastIndex) {
-                world.body {
-                    type = BodyDef.BodyType.StaticBody
-                    val nextVertex = vertices[index + 1]
-                    edge(
-                        vec2(vertex.x - 2.5f, vertex.y + 2.5f),
-                        vec2(nextVertex.x - 2.5f, nextVertex.y + 2.5f)
-                    ) {
-                    }
-                    edge(
-                        vec2(vertex.x + 2.5f, vertex.y - 2.5f),
-                        vec2(nextVertex.x + 2.5f, nextVertex.y - 2.5f)
+                        vec2(previous.second.x, previous.second.y),
+                        vec2(vertex.second.x, vertex.second.y)
                     ) {
                     }
                 }
@@ -315,11 +370,13 @@ sealed class MapDirection(val directionVector: Vector2) {
     companion object {
         val allDirections = listOf(Up, Down, Left, Right)
         val opposites = mapOf(Up to Down, Down to Up, Left to Right, Right to Left)
-        val possibleTurns = mapOf(
-            Up to listOf(Left, Right),
-            Down to listOf(Left, Right),
-            Left to listOf(Down, Up),
-            Right to listOf(Down, Up)
-        )
+        val possibleTurns by lazy {
+            mapOf(
+                Up to listOf(Left, Right),
+                Down to listOf(Left, Right),
+                Left to listOf(Down, Up),
+                Right to listOf(Down, Up)
+            )
+        }
     }
 }

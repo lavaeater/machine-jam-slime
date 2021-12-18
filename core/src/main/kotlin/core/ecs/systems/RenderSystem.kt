@@ -45,7 +45,7 @@ class RenderSystem(
 
             super.update(deltaTime)
         }
-        //box2DDebugRenderer.render(world, camera.combined)
+        box2DDebugRenderer.render(world, camera.combined)
     }
 
     private fun renderMap(deltaTime: Float) {
